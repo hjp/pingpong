@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,12 +7,18 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
+
+#include "gethostbynameornumber.h"
+
+char server_c_rcs_id[] = "$Id: server.c,v 1.5 2002-03-18 22:11:07 hjp Exp $";
 
 int main(int argc, char **argv) {
     int s;
     char *cmnd;
     struct sockaddr_in sa;
+    struct hostent *hep;
 
     cmnd = argv[0];
 
@@ -23,7 +31,33 @@ int main(int argc, char **argv) {
 
     memset(&sa, 0, sizeof(sa));
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(strtoul(argv[1], NULL, 0));
+    if (!(hep = gethostbynameornumber(argv[1]))) {
+	fprintf(stderr, "%s: cannot resolve hostname %s: %s\n",
+		cmnd, argv[1], strerror(errno));
+	herror(NULL);
+	exit(1);
+    }
+    if (hep->h_addr_list[1]) {
+	int i;
+
+	fprintf(stderr, "%s: host %s is multihomed (",
+		cmnd, argv[1]);
+	for (i = 0; hep->h_addr_list[i+1]; i++) {
+	    fprintf(stderr, "%d.%d.%d.%d, ",
+	    	   (unsigned char) hep->h_addr_list[i][0],
+	    	   (unsigned char) hep->h_addr_list[i][1],
+	    	   (unsigned char) hep->h_addr_list[i][2],
+	    	   (unsigned char) hep->h_addr_list[i][3]);
+	}
+	fprintf(stderr, "%d.%d.%d.%d) - using first address\n",
+	       (unsigned char) hep->h_addr_list[i][0],
+	       (unsigned char) hep->h_addr_list[i][1],
+	       (unsigned char) hep->h_addr_list[i][2],
+	       (unsigned char) hep->h_addr_list[i][3]);
+    }
+    assert(hep->h_length <= sizeof(sa.sin_addr));
+    memcpy(&sa.sin_addr, hep->h_addr_list[0], hep->h_length);
+
     sa.sin_port = htons(strtoul(argv[2], NULL, 0));
     if (bind(s, (struct sockaddr *)&sa, sizeof(sa)) == -1) {
 	    fprintf(stderr, "cannot bind socket: %s\n", strerror(errno));
@@ -47,7 +81,7 @@ int main(int argc, char **argv) {
 	    serial = 0;
 	}
 	if (0) printf("from %lx %d bytes, serial = %d\n",
-		ntohl(from.sin_addr.s_addr), data_len, serial);
+		(unsigned long)ntohl(from.sin_addr.s_addr), data_len, serial);
 	data_len = sendto(s, buffer, data_len, 0,
 			    (struct sockaddr *)&from, fromlen);
 	fflush(stdout);
@@ -55,3 +89,10 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
+/*
+    $Log: server.c,v $
+    Revision 1.5  2002-03-18 22:11:07  hjp
+    Added name resolution to server
+
+ */

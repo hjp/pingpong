@@ -12,5 +12,6 @@ distclean: clean
 	rm -f *.d
 
 client: client.o gethostbynameornumber.o
+server: server.o gethostbynameornumber.o
 
 -include *.d

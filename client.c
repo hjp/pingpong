@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
 #include "gethostbynameornumber.h"
 
