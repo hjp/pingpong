@@ -12,15 +12,24 @@
 
 #include "gethostbynameornumber.h"
 
-char server_c_rcs_id[] = "$Id: server.c,v 1.5 2002-03-18 22:11:07 hjp Exp $";
+char server_c_rcs_id[] = "$Id: server.c,v 1.6 2002-03-18 22:19:45 hjp Exp $";
+
+char *cmnd;
+
+static void usage(void) {
+    fprintf(stderr, "Usage: %s address port\n", cmnd);
+    exit(1);
+}
+
 
 int main(int argc, char **argv) {
     int s;
-    char *cmnd;
     struct sockaddr_in sa;
     struct hostent *hep;
 
     cmnd = argv[0];
+
+    if (argc != 3) usage();
 
     s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s == -1) {
@@ -92,7 +101,10 @@ int main(int argc, char **argv) {
 
 /*
     $Log: server.c,v $
-    Revision 1.5  2002-03-18 22:11:07  hjp
+    Revision 1.6  2002-03-18 22:19:45  hjp
+    Added usage message.
+
+    Revision 1.5  2002/03/18 22:11:07  hjp
     Added name resolution to server
 
  */

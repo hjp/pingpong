@@ -14,9 +14,14 @@
 
 #define WAIT_FOR_REPLY 1
 
+char *cmnd;
+
+static void usage(void) {
+    fprintf(stderr, "Usage: %s address port size count\n", cmnd);
+    exit(1);
+}
 int main(int argc, char **argv) {
     int s;
-    char *cmnd;
     struct sockaddr_in sa;
     int    data_len;
     int i;
@@ -31,6 +36,7 @@ int main(int argc, char **argv) {
 
     cmnd = argv[0];
 
+    if (argc != 5) usage();
 
     s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s == -1) {
