@@ -33,12 +33,11 @@ int main(int argc, char **argv) {
 	struct sockaddr_in from;
 	int     fromlen = sizeof(from);
 	int    data_len;
-	char    buffer[8192];
+	unsigned char    buffer[65537];
 	int serial;
 
 	data_len = recvfrom(s, buffer, sizeof(buffer), 0,
 			    (struct sockaddr *)&from, &fromlen);
-	printf("message from %lx\n", ntohl(from.sin_addr.s_addr));
 	if (data_len >= 4) {
 	    serial = (buffer[0] << 24) +
 	             (buffer[1] << 16) +
@@ -47,8 +46,12 @@ int main(int argc, char **argv) {
 	} else {
 	    serial = 0;
 	}
-	printf("%d bytes, serial = %d\n", data_len, serial);
-	printf("\n");
+	printf("from %x %d bytes, serial = %d\n",
+		ntohl(from.sin_addr.s_addr), data_len, serial);
+	data_len = sendto(s, buffer, data_len, 0,
+			    (struct sockaddr *)&from, fromlen);
+	fflush(stdout);
    }
 
+    return 0;
 }

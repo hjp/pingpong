@@ -3,9 +3,11 @@
 #include <string.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#define WAIT_FOR_REPLY 1
 
 int main(int argc, char **argv) {
     int s;
@@ -16,7 +18,7 @@ int main(int argc, char **argv) {
     int on = 1;
     int size;
     int count;
-    char buffer[65537];
+    unsigned char buffer[65537];
 
     cmnd = argv[0];
 
@@ -40,7 +42,11 @@ int main(int argc, char **argv) {
 
     size = strtoul(argv[3], 0, 0);
     count = strtoul(argv[4], 0, 0);
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < count; ) {
+	struct sockaddr_in from;
+	int     fromlen = sizeof(from);
+	fd_set fds;
+	struct timeval to;
 
 	buffer[0] = (i >> 24) & 0xFF;
 	buffer[1] = (i >> 16) & 0xFF;
@@ -54,7 +60,22 @@ int main(int argc, char **argv) {
 	} else {
 	    printf("%d bytes\n", data_len);
 	}
+
+#if WAIT_FOR_REPLY
+	FD_ZERO(&fds);
+	FD_SET(s, &fds);
+	to.tv_sec = 1;
+	to.tv_usec = 0;
+	if (select(s+1, &fds, NULL, NULL, &to) > 0) {
+	    data_len = recvfrom(s, buffer, sizeof(buffer), 0,
+				(struct sockaddr *)&from, &fromlen);
+	    i++;
+	} else {
+	    printf("timeout! retrying\n");
+	}
+		
     }
+#endif
 
     return 0;
 }
