@@ -1,0 +1,11 @@
+if [ $# -ne 2 ]
+then 
+    echo "Usage: $0 target-ip target-port" >&2
+    exit 1
+fi
+
+for i in 16 32 64 128 256 512 1024 1460 1500 2048 4096 8192 9126 10240 16384
+do
+    ./client $1 $2 $i  10000
+done | tee `hostname`-$1-`date '+%Y-%m-%dT%H:%M:%S'`
+

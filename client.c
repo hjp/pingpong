@@ -24,6 +24,8 @@ int main(int argc, char **argv) {
     struct timeval tv0, tv1;
     double t;
     struct hostent *hep;
+    int err = 0;
+    int max_err = 0;
 
     cmnd = argv[0];
 
@@ -69,6 +71,7 @@ int main(int argc, char **argv) {
     size = strtoul(argv[3], 0, 0);
     count = strtoul(argv[4], 0, 0);
 
+    for (i = count; i>>=1; max_err++);
 
     gettimeofday(&tv0, NULL);
 
@@ -84,11 +87,8 @@ int main(int argc, char **argv) {
 	buffer[3] = (i >> 0) & 0xFF;
 	data_len = sendto(s, buffer, size, 0,
 			    (struct sockaddr *)&sa, sizeof(sa));
-	if (0) printf("message to %lx\n", ntohl(sa.sin_addr.s_addr));
 	if (data_len == -1) {
-	    printf("%s\n", strerror(errno));
-	} else {
-	    if (0) printf("%d bytes\n", data_len);
+	    fprintf(stderr, "%s: sendto failed: %s\n", cmnd, strerror(errno));
 	}
 
 #if WAIT_FOR_REPLY
@@ -101,9 +101,12 @@ int main(int argc, char **argv) {
 				(struct sockaddr *)&from, &fromlen);
 	    i++;
 	} else {
-	    printf("timeout at serial %d: retrying\n", i);
+	    fprintf(stderr, "%s: timeout at serial %d: retrying\n", cmnd, i);
+	    if (++err >= max_err) {
+		fprintf(stderr, "%s: bailing out\n", cmnd);
+		break;
+	   } 
 	}
-		
 #endif
     }
 
@@ -111,6 +114,6 @@ int main(int argc, char **argv) {
 
     t = (tv1.tv_sec + tv1.tv_usec * 1E-6) -
         (tv0.tv_sec + tv0.tv_usec * 1E-6) ;
-    printf ("%d %g %g\n", size, t, ((double)size * count) / t);
+    printf ("%d %d %d %g %g\n", size, i, err, t, ((double)size * i) / t);
     return 0;
 }
