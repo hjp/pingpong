@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 	} else {
 	    serial = 0;
 	}
-	printf("from %x %d bytes, serial = %d\n",
+	printf("from %lx %d bytes, serial = %d\n",
 		ntohl(from.sin_addr.s_addr), data_len, serial);
 	data_len = sendto(s, buffer, data_len, 0,
 			    (struct sockaddr *)&from, fromlen);
