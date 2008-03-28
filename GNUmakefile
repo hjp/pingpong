@@ -14,4 +14,9 @@ distclean: clean
 client: client.o gethostbynameornumber.o
 server: server.o gethostbynameornumber.o
 
+GNUmakevars: GNUmakevars.sh
+	sh ./$^ > $@
+GNUmakerules: GNUmakerules.sh
+	sh ./$^ > $@
+
 -include *.d
