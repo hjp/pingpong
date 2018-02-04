@@ -1,5 +1,5 @@
 #!/bin/sh
 echo "\$(DESTDIR)\$(BINDIR)/%: %"
-echo -e "\tcp \$^ \$@"
+echo "\tcp \$^ \$@"
 echo "\$(DESTDIR)\$(MAN1DIR)/%: %"
-echo -e "\tcp \$^ \$@"
+echo "\tcp \$^ \$@"
