@@ -1,6 +1,6 @@
 include GNUmakevars
 include GNUmakerules
-CFLAGS= -g $(INCLUDES)
+CFLAGS += -g $(INCLUDES)
 
 
 all: server client
