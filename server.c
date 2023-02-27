@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     }
     for (;;) {
 	struct sockaddr_in from;
-	int     fromlen = sizeof(from);
+	int    fromlen = sizeof(from);
 	int    data_len;
 	unsigned char    buffer[65537];
 	int serial;
@@ -89,11 +89,13 @@ int main(int argc, char **argv) {
 	} else {
 	    serial = 0;
 	}
-	if (0) printf("from %lx %d bytes, serial = %d\n",
-		(unsigned long)ntohl(from.sin_addr.s_addr), data_len, serial);
+	if (0) {
+            printf("from %lx %d bytes, serial = %d\n",
+                   (unsigned long)ntohl(from.sin_addr.s_addr), data_len, serial);
+            fflush(stdout);
+        }
 	data_len = sendto(s, buffer, data_len, 0,
 			    (struct sockaddr *)&from, fromlen);
-	fflush(stdout);
    }
 
     return 0;
